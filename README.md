@@ -54,7 +54,9 @@ Run the tests:
 python -m pytest -q
 ```
 
-Tests that need a missing dependency are skipped with the reason.
+Tests that need a missing dependency are skipped with the reason. From an uninstalled checkout, run
+them from the repo root without `-I`: isolated mode (`python -I`) drops the current directory from
+the import path, so `ssr` cannot be imported unless the package is installed.
 
 ## Five-minute quickstart (authored fixture)
 
