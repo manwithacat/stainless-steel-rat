@@ -1,0 +1,16 @@
+# Run state, journals and generated circuits stay out of Git.
+runs/
+run/
+journal/
+journals/
+*.kmb
+*.kmx
+*.npz
+*.egg-info/
+build/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.hypothesis/

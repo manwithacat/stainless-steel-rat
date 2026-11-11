@@ -1,0 +1,24 @@
+The Stainless Steel Rat
+=======================
+
+Copyright 2026 James Barlow
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Written by the "R" research pathway (ChatGPT, run by James Barlow / manwithacat) of a
+Verifiable Quantum Circuit Compilation project. The vendored QHDL core in ssr/qhdl/
+(KMB reader/writer, bitset simulator, lifetime allocator, editors) was written by that
+project's Claude pathway; each module names its original file.
+
+Not included; used only when you install or point to them yourself:
+
+* kickmix: Google Quantum AI's circuit library and its KMB/KMX formats, distributed
+  with Qualtran under its own licence. Imported as an optional dependency.
+* kickmix-engine: a separate native (Rust) execution engine project with its own
+  licence and NOTICE. Located at run time through --engine-python or SSR_ENGINE_PYTHON.
+* The competition's official verifiers. The invsqrt verifier module is loaded at run
+  time from SSR_INVSQRT_VERIFIER, unmodified. No verifier code or competition data
+  ships in this repository.
+
+No public or private competition circuits are included. Test fixtures are small
+authored circuits.

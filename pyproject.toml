@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stainless-steel-rat"
+version = "0.1.0"
+description = "Agent-driven, receipt-bound rewrite tooling for kickmix (KMB) quantum circuits"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+# kickmix is Google Quantum AI's circuit library (distributed with Qualtran).
+# Install it separately if it is not available from your package index.
+kickmix = ["kickmix"]
+scipy = ["scipy"]
+test = ["pytest"]
+
+[project.scripts]
+ssr-rat = "ssr.rat.cli:main"
+ssr-mouse = "ssr.mouse.cli:main"
+ssr-workbench = "ssr.workbench.cli:main"
+ssr-native = "ssr.native.cli:main"
+ssr-crosscut = "ssr.crosscut.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ssr*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
