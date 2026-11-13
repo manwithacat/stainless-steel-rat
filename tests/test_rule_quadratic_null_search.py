@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from support import need_kickmix
 from ssr.rules import quadratic_null_search as N
 from ssr.rules import reader_cut_quadratic as R
 from ssr.rules import target_accumulation as A
+from ssr.crosscut import rule as C
+from ssr.qhdl import bitsim as B
 
 km = need_kickmix()
 
@@ -41,3 +44,25 @@ def test_live_product_relation_lowers_exact_polynomial_rank(tmp_path: Path) -> N
     changed = _source(tmp_path / "changed.kmb", duplicate=False)
     with pytest.raises(ValueError, match="stale"):
         N.search(changed, site["handle"], rows=8192, outcomes=("zero",))
+
+
+def test_reader_null_refinement_on_reachable_alias() -> None:
+    states = np.arange(512, dtype=np.uint64)
+    nq, target = 12, 11
+    packed = np.zeros((nq, 8), dtype=np.uint64)
+    input_wires = [0, 1, 2, 5, 6, 7, 8, 9, 10]
+    for bit, wire in enumerate(input_wires):
+        packed[wire] = B.pack_bits(((states >> np.uint64(bit)) & 1).astype(bool))
+    packed[4] = packed[0].copy()
+    valid = B.pack_bits(np.ones(len(states), bool))
+    adjacency = [0] * nq
+    for a, b in [(0, 1), (4, 2), (5, 6), (7, 8), (9, 10)]:
+        adjacency[a] ^= 1 << b
+        adjacency[b] ^= 1 << a
+    poly = {"linear": 0, "constant": False, "adj": adjacency}
+    assert len(C.factor(poly)[0]) == 5
+    wanted = C.evaluate(poly, packed, valid)
+    result = R._refine(poly, packed, valid, wanted, target, support=11)
+    assert result["status"] == "rank_reduced_on_panel"
+    assert result["factor_count"] <= 4
+    assert result["independent_panel_replay"]

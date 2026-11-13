@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from itertools import combinations
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +18,7 @@ import numpy as np
 from ssr.crosscut import rule as C
 from ssr.qhdl import bitsim as B
 from ssr.rules import quadratic_rank as Q
+from ssr.rules.quadratic_null_search import AffineQuotient
 from ssr.rules import target_accumulation as A
 
 
@@ -43,10 +45,11 @@ def _pack_entry(sim: B.BitSim, target: int, nq: int) -> np.ndarray:
 
 def analyze(source: Path, handle: str, *, sample_rows: int = 8192,
             outcomes: tuple[str, ...] = ("zero", "7", "101"),
-            trials: int = 1) -> dict:
+            trials: int = 1, refine_support: int = 0) -> dict:
     source = Path(source)
     site = A.resolve(source, handle)
-    if not 128 <= sample_rows <= B.MAX_X or not 1 <= len(outcomes) <= 4 or not 1 <= trials <= 128:
+    if (not 128 <= sample_rows <= B.MAX_X or not 1 <= len(outcomes) <= 4
+            or not 1 <= trials <= 128 or not 0 <= refine_support <= 32):
         raise ValueError("invalid sample size or outcome count")
     header, _, ops, nq = Q.load(source)
     xq = [int(line.split()[1][1:]) for line in header if line.startswith("APPEND_TO_REGISTER ")]
@@ -120,6 +123,9 @@ def analyze(source: Path, handle: str, *, sample_rows: int = 8192,
                   factor_count=len(factors), quadratic_rank=2 * len(factors),
                   products=[[a, b] for a, b in factors], linear=linear, constant=constant,
                   independent_table_replay=True)
+    if refine_support:
+        result["refinement"] = _refine(poly, packed, valid, wanted,
+                                        target, refine_support)
     return result
 
 
@@ -134,6 +140,83 @@ def _unpermute(poly: dict, permutation: list[int]) -> dict:
     return {"linear": linear, "constant": poly["constant"], "adj": adjacency}
 
 
+def _apply_product(poly: dict, left: int, right: int) -> dict:
+    result = {"linear": poly["linear"], "constant": poly["constant"],
+              "adj": list(poly["adj"])}
+    while left:
+        abit = left & -left
+        a = abit.bit_length() - 1
+        for b in range(len(result["adj"])):
+            if (right >> b) & 1:
+                if a == b:
+                    result["linear"] ^= 1 << a
+                else:
+                    result["adj"][a] ^= 1 << b
+                    result["adj"][b] ^= 1 << a
+        left ^= abit
+    return result
+
+
+def _refine(poly: dict, packed: np.ndarray, valid: np.ndarray,
+            wanted: np.ndarray, target: int, support: int) -> dict:
+    nq = len(packed)
+    cols = [int.from_bytes(packed[i].tobytes(), "little") for i in range(nq)]
+    quotient = AffineQuotient([(i, cols[i]) for i in range(nq) if i != target],
+                              int.from_bytes(valid.tobytes(), "little"))
+    factor_masks = [mask for pair in C.factor(poly)[0] for mask in pair]
+    scores = {i: sum((mask >> i) & 1 for mask in factor_masks)
+              for i in range(nq) if i != target}
+    selected = sorted(scores, key=lambda i: (-scores[i], i))[:support]
+    forms = [(1 << i, cols[i]) for i in selected]
+    forms += [((1 << a) | (1 << b), cols[a] ^ cols[b])
+              for a, b in combinations(selected, 2)]
+    original_rank = Q.rank(poly["adj"])
+    seen = {}
+    checked = 0
+    collisions = 0
+    null_products = 0
+    for i, (left, lv) in enumerate(forms):
+        for right, rv in forms[i + 1:]:
+            checked += 1
+            residual, affine = quotient.reduce(lv & rv)
+            if residual == 0:
+                null_products += 1
+                moves = [(left, right)]
+                correction = affine
+            elif residual in seen:
+                collisions += 1
+                old_left, old_right, old_affine = seen[residual]
+                moves = [(old_left, old_right), (left, right)]
+                correction = old_affine ^ affine
+            else:
+                seen[residual] = (left, right, affine)
+                continue
+            candidate = poly
+            for lmask, rmask in moves:
+                candidate = _apply_product(candidate, lmask, rmask)
+            if Q.rank(candidate["adj"]) >= original_rank:
+                continue
+            for k, (wire, _) in enumerate(quotient.columns):
+                if (correction >> k) & 1:
+                    if wire == -1:
+                        candidate["constant"] = not candidate["constant"]
+                    else:
+                        candidate["linear"] ^= 1 << wire
+            if not np.array_equal(C.evaluate(candidate, packed, valid), wanted):
+                raise AssertionError("nullspace refinement failed independent panel replay")
+            factors, linear, constant = C.factor(candidate)
+            return {"status": "rank_reduced_on_panel", "support_wires": selected,
+                    "forms_tested": checked, "collisions": collisions,
+                    "affine_null_products": null_products,
+                    "factor_count": len(factors), "products": [[a, b] for a, b in factors],
+                    "linear": linear, "constant": constant,
+                    "null_moves": [[a, b] for a, b in moves],
+                    "independent_panel_replay": True}
+    return {"status": "no_rank_reducing_relation_found", "support_wires": selected,
+            "forms_tested": checked, "collisions": collisions,
+            "affine_null_products": null_products}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
@@ -141,20 +224,25 @@ def main() -> None:
     parser.add_argument("--rows", type=int, default=8192)
     parser.add_argument("--outcomes", default="zero,7,101")
     parser.add_argument("--trials", type=int, default=1)
+    parser.add_argument("--refine-support", type=int, default=0,
+                        help="search rank-lowering products of <=2 selected live wires")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.out.exists():
         parser.error("refuse to overwrite output")
     try:
         result = analyze(args.source, args.handle, sample_rows=args.rows,
-                         outcomes=tuple(args.outcomes.split(",")), trials=args.trials)
+                         outcomes=tuple(args.outcomes.split(",")), trials=args.trials,
+                         refine_support=args.refine_support)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({"status": result["status"], "reader": result["reader_op"],
                       "states": result["unique_reader_states"],
-                      "factors": result.get("factor_count"), "out": str(args.out)}))
+                      "factors": result.get("factor_count"),
+                      "refinement": result.get("refinement", {}).get("status"),
+                      "out": str(args.out)}))
 
 
 if __name__ == "__main__":
