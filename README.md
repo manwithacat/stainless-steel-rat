@@ -185,6 +185,10 @@ All rule tools read a source KMB, never overwrite an output, and bind handles to
 | `python -m ssr.crosscut.peak_barriers SRC.kmb --run R --out F` | obligations | information-loss operations for idle wires across one peak run |
 | `python -m ssr.crosscut.coverage` | planning | optimistic peak-cover lower bound (needs `scipy`) |
 | `python -m ssr.rules.quadratic_rank SRC.kmb --out census.json` then `--handle H --out child.kmb` | census + construction | one-target CCX windows rewritten to `rank/2` CCXs, exact on all entry states; `--phase-transparent` keeps non-target phase/measurement ops in place |
+| `python -m ssr.rules.target_accumulation SRC.kmb --out census.json` | census | source-bound target-only five-CCX windows for reached-state synthesis; reports arbitrary-entry rank and obligations, emits no candidate |
+| `python -m ssr.rules.minand_smt --table TABLE.json --target qN --gates 4 --timeout 120 --out PLAN.json` | bounded synthesis | optional `.[synth]` Z3 search for an AND straight-line program on a reached target-toggle table; checks every supplied row, emits no KMB |
+| `python -m ssr.rules.quadratic_null_search SRC.kmb --handle H --out null.json [--beam-width 300]` | finite prescreen | tests whether two physical entry-wire products agree modulo affine terms and lower an accumulation's exact arbitrary-entry rank; optional bounded two-relation beam; no KMB emission |
+| `python -m ssr.rules.reader_cut_quadratic SRC.kmb --handle H --trials 128 --out reader.json` | finite prescreen | moves the analysis interface to the first target reader, fits a quadratic in physical wire values there, and reports the best factor count among seeded coordinate orders; no KMB emission |
 | `python -m ssr.rules.zero_control_cx SRC.kmb` | census | gates provably inert because a control is zero |
 | `python -m ssr.rules.zero_control_peak_release SRC.kmb PEAK.json --script E --report R` | construction | reset + deletions releasing a scratch wire across a peak run (edit script) |
 | `python -m ssr.rules.disjoint_involutions SRC.kmb --output F` | census | self-inverse gate pairs cancelling across untouched corridors |

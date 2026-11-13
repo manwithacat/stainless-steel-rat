@@ -17,6 +17,7 @@ dependencies = ["numpy"]
 # Install it separately if it is not available from your package index.
 kickmix = ["kickmix"]
 scipy = ["scipy"]
+synth = ["z3-solver>=4.13"]
 test = ["pytest"]
 
 [project.scripts]
