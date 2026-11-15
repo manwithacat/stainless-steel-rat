@@ -7,9 +7,10 @@ from pathlib import Path
 import pytest
 
 from support import need_kickmix
-from ssr.rules import target_accumulation as A
 
-km = need_kickmix()
+km = need_kickmix()   # skip the module before importing rules that need kickmix
+
+from ssr.rules import target_accumulation as A  # noqa: E402
 
 
 def write(path: Path, lines: list[str]) -> Path:

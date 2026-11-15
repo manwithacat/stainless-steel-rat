@@ -1,5 +1,10 @@
 # The Stainless Steel Rat
 
+> **Work in progress.** This is a research toolkit published as it stands, mid-development. Interfaces and rule
+> names may change without notice, the native backend is marked experimental, and only the `invsqrt` task adapter
+> exists. Nothing here produces a score on its own: the competition's official verifier is the only authority.
+> Written with AI assistance (Claude) under the repository owner's direction. Issues and pull requests are welcome.
+
 The Stainless Steel Rat (SSR, or "the Rat") is a toolkit that lets an LLM agent rewrite
 [kickmix](https://github.com/quantumlib/Qualtran/tree/main/kickmix) circuits (`.kmb`) safely.
 The agent proposes; the Rat builds, checks, records and refuses.

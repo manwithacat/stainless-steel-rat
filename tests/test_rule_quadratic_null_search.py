@@ -8,8 +8,11 @@ import numpy as np
 import pytest
 
 from support import need_kickmix
-from ssr.rules import quadratic_null_search as N
-from ssr.rules import reader_cut_quadratic as R
+
+need_kickmix()   # skip the module before importing rules that need kickmix
+
+from ssr.rules import quadratic_null_search as N  # noqa: E402
+from ssr.rules import reader_cut_quadratic as R  # noqa: E402
 from ssr.rules import target_accumulation as A
 from ssr.crosscut import rule as C
 from ssr.qhdl import bitsim as B
