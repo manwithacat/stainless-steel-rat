@@ -12,7 +12,7 @@ def need_kickmix():
 
 def need_verifier():
     need_kickmix()
-    from ssr.mouse import verifier
+    from ssr.core import verifier
     if not verifier.available():
         pytest.skip("SSR_INVSQRT_VERIFIER is not set to a copy of the official invsqrt verifier",
                     allow_module_level=True)

@@ -10,8 +10,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from ssr.mouse import official
-from ssr.mouse.official import recorded_receipt
+from ssr.core import official
+from ssr.core.official import recorded_receipt
 
 # Authored stand-ins: a synthetic recorded report and a fake verifier file. The
 # original test read a real local official report; these exercise the same checks.

@@ -2,17 +2,17 @@
 import sys,json
 from pathlib import Path
 from ssr.stream.stream import StreamingProbe,sha
-from ssr.mouse.evaluator import default_contract,digest
-from ssr.mouse.store import StateStore
-from ssr.mouse import actions
-from ssr.mouse.environment import CircuitMouse
+from ssr.core.evaluator import default_contract,digest
+from ssr.core.store import StateStore
+from ssr.core import actions
+from ssr.cursor.environment import StateCursor
 
 class NativeRat:
  # Subclasses swap the evaluator and extend the bound code fingerprints here
  # (previously done by loading private module copies and patching globals).
  probe_class=StreamingProbe
  @classmethod
- def core_fingerprints(cls):return CircuitMouse._fingerprints()
+ def core_fingerprints(cls):return StateCursor._fingerprints()
  def __init__(self,root,engine_python,source=None,contract=None,debt_fraction=None):
   self.root=Path(root);cp=self.root/'context.json';old=json.loads(cp.read_text())['context'] if cp.exists() else None
   contract=contract or (old['contract'] if old else default_contract());self.probe=self.probe_class(engine_python,contract)

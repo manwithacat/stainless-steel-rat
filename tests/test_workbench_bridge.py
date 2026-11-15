@@ -3,15 +3,15 @@ import hashlib
 import pytest
 from support import need_verifier
 need_verifier()
-from ssr.workbench.bridge import SSRWorkbench, QueryBudget, CircuitMouse
-from ssr.mouse.fixtures import write_fixture
+from ssr.workbench.bridge import SSRWorkbench, QueryBudget, StateCursor
+from ssr.core.fixtures import write_fixture
 
 def hashes(root):
  return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*') if p.is_file()}
 
 def setup(tmp_path, **budgets):
  f=write_fixture(tmp_path/'fixture')
- rat=CircuitMouse(tmp_path/'run',f['source'],f['contract'],max_wires=8)
+ rat=StateCursor(tmp_path/'run',f['source'],f['contract'],max_wires=8)
  return rat,SSRWorkbench(tmp_path/'run',tmp_path/'journal',**budgets)
 
 FIT={'type':'fit_recompute','wire':3,'after':0,'before':5,'basis':[0,1,2],'degree':2,'validation':'full'}
@@ -30,7 +30,7 @@ def test_query_apply_and_stale_guard(tmp_path):
  count=len(w.parent.read_events())
  with pytest.raises(ValueError,match='stale'):w.apply_query(fit['query_id'])
  assert len(w.parent.read_events())==count
- rat=CircuitMouse(tmp_path/'run');rat.propose({'type':'recolour'})
+ rat=StateCursor(tmp_path/'run');rat.propose({'type':'recolour'})
  comparison=w.query({'type':'compare','other_sha256':initial})
  assert comparison['status']=='ok',comparison
  assert comparison['result']['loss_delta_this_minus_other']<0

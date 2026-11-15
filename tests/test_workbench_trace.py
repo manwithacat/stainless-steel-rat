@@ -14,7 +14,7 @@ from ssr.qhdl import edit as EDIT
 from ssr.qhdl import kmb as K
 from support import need_verifier
 need_verifier()
-from ssr.mouse.evaluator import InvSqrtEvaluator
+from ssr.core.evaluator import InvSqrtEvaluator
 from ssr.workbench.trace import TraceError, investigate_trace
 
 

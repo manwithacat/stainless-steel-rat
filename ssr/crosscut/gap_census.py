@@ -142,7 +142,7 @@ def _gap_candidates(k: K.Kmb, iv: dict[str, Any], registers: dict[int, Any],
 
 
 def _hmr_affordances(k: K.Kmb, source_sha: str, limit: int = MAX_HMR_ACTIONS) -> list[dict[str, Any]]:
-    """List only earlier moves accepted by CircuitMouse's disjoint-touch guard."""
+    """List only earlier moves accepted by StateCursor's disjoint-touch guard."""
     if type(limit) is not int or not 0 <= limit <= MAX_HMR_ACTIONS:
         raise CensusError(f"HMR action limit must be 0..{MAX_HMR_ACTIONS}")
     depths = _condition_depths(k.op_types)

@@ -4,7 +4,7 @@ import pytest
 from support import need_engine
 ENGINE=need_engine()
 from ssr.rat.interface import Rat
-from ssr.mouse.fixtures import write_fixture
+from ssr.core.fixtures import write_fixture
 def test_queries_stale_rollback(tmp_path):
  f=write_fixture(tmp_path/'fixture');r=Rat(tmp_path/'run',ENGINE,f['source'],f['contract']);state=r.current
  q=r.query({'type':'window','start':0,'end':6},state);assert q['state_sha256']==state

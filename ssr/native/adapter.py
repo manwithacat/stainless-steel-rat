@@ -3,7 +3,7 @@ from pathlib import Path
 import sys,time,hashlib,json,importlib
 import numpy as np
 HERE=Path(__file__).resolve().parent
-from ssr.mouse.evaluator import V,validate_contract,sha,VERIFIER
+from ssr.core.evaluator import V,validate_contract,sha,VERIFIER
 from fractions import Fraction
 
 class NativeProbe:

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stainless-steel-rat"
-version = "0.1.0"
+version = "0.2.0"
 description = "Agent-driven, receipt-bound rewrite tooling for kickmix (KMB) quantum circuits"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -22,7 +22,8 @@ test = ["pytest"]
 
 [project.scripts]
 ssr-rat = "ssr.rat.cli:main"
-ssr-mouse = "ssr.mouse.cli:main"
+ssr-cursor = "ssr.cursor.cli:main"
+ssr-mouse = "ssr.cursor.cli:main"   # deprecated alias
 ssr-workbench = "ssr.workbench.cli:main"
 ssr-native = "ssr.native.cli:main"
 ssr-crosscut = "ssr.crosscut.cli:main"

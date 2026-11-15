@@ -1,1 +1,1 @@
-"""Read-only investigation journal (structure, values, traces) over a circuit-mouse run."""
+"""Read-only investigation journal (structure, values, traces) over a state-cursor run."""

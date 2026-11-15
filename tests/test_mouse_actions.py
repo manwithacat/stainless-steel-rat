@@ -12,7 +12,7 @@ import numpy as np
 
 from ssr.qhdl import edit as EDIT
 from ssr.qhdl import kmb as KMB
-from ssr.mouse.actions import ActionError, apply_action
+from ssr.core.actions import ActionError, apply_action
 
 
 def write_kmb(path: Path, ops: list[str], num_qubits: int = 6, num_bits: int = 1,

@@ -2,8 +2,8 @@
 import argparse,json,sys
 from pathlib import Path
 from ssr.native.adapter import NativeProbe,default_engine_python
-from ssr.mouse.store import StateStore
-from ssr.mouse.evaluator import sha
+from ssr.core.store import StateStore
+from ssr.core.evaluator import sha
 import numpy as np
 
 def main():

@@ -71,7 +71,7 @@ can be measured out and rebuilt later, after which recolouring removes a wire.
 
 ```sh
 mkdir -p runs
-python -m ssr.mouse.fixtures runs/fixture        # writes source.kmb, source.kmx, contract.json
+python -m ssr.core.fixtures runs/fixture          # writes source.kmb, source.kmx, contract.json
 python -m ssr.rat --run runs/demo init --source runs/fixture/source.kmb \
        --contract runs/fixture/contract.json
 ```
@@ -127,6 +127,22 @@ Everything is in `runs/demo`: `objects/` (every state by SHA), `evaluations/` (r
 `events/` (the journal) and `attempts/` (each build, including failures). Reopening the run
 with any command restores the last checkpoint.
 
+## Concepts
+
+- **State graph.** Every circuit the Rat ever builds is stored once under its SHA-256, with the guarded step that
+  produced it. Nothing is overwritten; the journal is append-only.
+- **Cursor.** A pointer into that graph: the state the agent is working on now. Steps move it to a new state, and
+  rollback moves it back. `ssr.cursor` is the cursor with a local BitSim evaluator. `ssr.rat` runs the same kind of
+  walk on the native engine, with static queries.
+- **Incumbent.** The best valid state seen so far, kept apart from the cursor, so a bad step never loses it.
+- **Rule.** A repeatable transformation with five stages: census, obligations, construction, admission, controls
+  (see the rule contract).
+- **Receipt.** The evidence behind every evaluation: inputs, hashes, outcome model and result, written to the journal.
+
+Earlier versions called the cursor the "mouse" (`ssr.mouse`, `CircuitMouse`). The old names still work for the 0.x
+series, with a deprecation warning. The format strings already written into run folders
+(`qhdl-circuit-mouse-store-v1` and its event and evaluation formats) are kept unchanged, so earlier runs still open.
+
 ## The core loop, as an agent should run it
 
 1. **init** once per run directory, on a fresh directory. The context (source SHA, task
@@ -163,11 +179,11 @@ The exact command and action reference to give an agent is
 | `ssr.workbench` | `{"type":"compare","other_sha256":"<sha>"}` | structure and recorded local losses of two states |
 | `ssr.crosscut` | `{"type":"information_boundary","wire":W,"start":I,"stop":J}` | first op where an idle wire stops being determined by the others (22-wire invsqrt only) |
 
-`ssr.workbench` works on a **local BitSim run** made by `python -m ssr.mouse` (same actions,
+`ssr.workbench` works on a **local BitSim run** made by `python -m ssr.cursor` (same actions,
 local outcome models `zero`/`7`/`101` instead of the native engine):
 
 ```sh
-python -m ssr.mouse --run runs/local init --source runs/fixture/source.kmb \
+python -m ssr.cursor --run runs/local init --source runs/fixture/source.kmb \
        --contract runs/fixture/contract.json --sample-rows 3
 python -m ssr.workbench --run runs/local --journal runs/local-journal query \
        --request '{"type":"fit_recompute","wire":3,"after":0,"before":5,"basis":[0,1,2],"degree":2,"validation":"full"}'
@@ -227,7 +243,7 @@ Never claim:
   to fixed local or native schedules, with final-input padding included;
 * that "no candidate" from a bounded query means no improvement exists. It covers only that basis,
   degree and budget;
-* an official result you did not run. `python -m ssr.mouse ... record-official --report R` only
+* an official result you did not run. `python -m ssr.cursor ... record-official --report R` only
   attaches an existing report, marked `recorded-not-rerun`, after checking circuit SHA, settings
   and verifier hash.
 
@@ -247,7 +263,7 @@ Never claim:
 ## Limitations
 
 * No learned or automatic search policy beyond a small automatic menu in the local loop
-  (`python -m ssr.mouse ... explore`, recolour and HMR advances only). Park expressions and
+  (`python -m ssr.cursor ... explore`, recolour and HMR advances only). Park expressions and
   windows come from the agent or a rule.
 * One task adapter (`invsqrt`, at most 22 input wires). The exact-domain crosscut queries need the
   full 22-wire task.
@@ -261,7 +277,9 @@ Never claim:
 
 ```
 ssr/qhdl/       vendored QHDL core: KMB I/O, bitset simulator, lifetime allocator, editors
-ssr/mouse/      state store, guarded actions, local invsqrt evaluator, local loop CLI, fixture
+ssr/core/       state store, invsqrt task model and verifier loading, guarded actions, fixture
+ssr/cursor/     the state cursor: local (BitSim) loop over the state graph, and its CLI
+ssr/mouse/      deprecated alias for ssr.core and ssr.cursor (0.x series)
 ssr/workbench/  read-only investigation journal over a local run
 ssr/native/     native engine probe
 ssr/stream/     first native loop (streaming evaluator)

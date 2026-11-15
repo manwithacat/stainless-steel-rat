@@ -1,4 +1,4 @@
-"""Read-only, bounded semantic queries for the circuit mouse workbench.
+"""Read-only, bounded semantic queries for the state-cursor workbench.
 
 Snapshots are at operation boundaries: boundary ``p`` is immediately before op
 ``p`` (and therefore after ops ``0..p-1``).  Results describe only the selected

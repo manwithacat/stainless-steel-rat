@@ -12,7 +12,7 @@ ENGINE = need_engine()
 import kickmix as km  # noqa: E402
 
 from ssr.qhdl import kmb as K  # noqa: E402
-from ssr.mouse.fixtures import write_fixture  # noqa: E402
+from ssr.core.fixtures import write_fixture  # noqa: E402
 from ssr.stream import stream as _old  # noqa: E402  (v1 streaming probe)
 from ssr.rat import stream as _new  # noqa: E402  (grouped-reference probe)
 

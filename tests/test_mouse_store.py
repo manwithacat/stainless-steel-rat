@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ssr.mouse.store import StateStore
+from ssr.core.store import StateStore
 
 
 CONTEXT = {

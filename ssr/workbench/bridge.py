@@ -4,21 +4,21 @@ from copy import deepcopy
 import importlib,json,sys,time,fcntl
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
-from ssr.mouse.environment import CircuitMouse
-from ssr.mouse.evaluator import InvSqrtEvaluator,sha,digest,QHDL
-from ssr.mouse.store import StateStore
+from ssr.cursor.environment import StateCursor
+from ssr.core.evaluator import InvSqrtEvaluator,sha,digest,QHDL
+from ssr.core.store import StateStore
 
 def _module(name):return importlib.import_module('ssr.workbench.'+name)
 
 class QueryBudget(RuntimeError):pass
 
 class SSRWorkbench:
- def __init__(self,mouse_run,evidence_root,max_queries=None,max_full_queries=None):
-  self.mouse_run=Path(mouse_run).absolute();self.root=Path(evidence_root).absolute()
-  if not (self.mouse_run/'context.json').is_file() or any(not (self.mouse_run/n).is_dir() for n in ['objects','events','evaluations']):raise ValueError('existing circuit run required')
-  parent=json.loads((self.mouse_run/'context.json').read_text())['context']
-  if parent['fingerprints']!=CircuitMouse._fingerprints():raise ValueError('underlying evaluator differs from run context')
-  self.parent=StateStore(self.mouse_run,parent)
+ def __init__(self,cursor_run,evidence_root,max_queries=None,max_full_queries=None):
+  self.cursor_run=Path(cursor_run).absolute();self.root=Path(evidence_root).absolute()
+  if not (self.cursor_run/'context.json').is_file() or any(not (self.cursor_run/n).is_dir() for n in ['objects','events','evaluations']):raise ValueError('existing circuit run required')
+  parent=json.loads((self.cursor_run/'context.json').read_text())['context']
+  if parent['fingerprints']!=StateCursor._fingerprints():raise ValueError('underlying evaluator differs from run context')
+  self.parent=StateStore(self.cursor_run,parent)
   files=[HERE/n for n in ['bridge.py','cli.py','structure.py','values.py','trace.py']]+[QHDL/'cheap_function.py']
   code={str(p):sha(p) for p in files}
   oldpath=self.root/'context.json';old=json.loads(oldpath.read_text())['context'] if oldpath.exists() else None
@@ -88,7 +88,7 @@ class SSRWorkbench:
  def apply_query(self,key):
   receipt=self.read_query(key);result=receipt.get('result') or {};action=result.get('candidate_action')
   if receipt['status']!='ok' or result.get('status')!='validated' or not action:raise ValueError('query contains no validated-scope candidate action')
-  rat=CircuitMouse(self.mouse_run)
+  rat=StateCursor(self.cursor_run)
   if rat.current!=receipt['state_sha256']:raise ValueError('stale proposal: queried SHA differs from current state; query current state or roll back explicitly')
   transition=rat.propose(action);self.journal.append_event('action_submitted',{'query_id':key,'source_sha256':receipt['state_sha256'],'action':action,'transition':transition})
   return {'query_id':key,'source_sha256':receipt['state_sha256'],'query_validation_scope':result.get('candidate_scope'),'transition':transition,'scope':'existing circuit environment tests whole candidate; relation receipt alone is not acceptance'}

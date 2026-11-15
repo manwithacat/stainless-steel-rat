@@ -4,7 +4,7 @@ import pytest
 from support import need_engine
 ENGINE=need_engine()
 from ssr.stream.session import NativeRat
-from ssr.mouse.fixtures import write_fixture
+from ssr.core.fixtures import write_fixture
 def test_actions_rollback_resume(tmp_path):
  f=write_fixture(tmp_path/'f');r=NativeRat(tmp_path/'run',ENGINE,f['source'],f['contract'])
  assert r.propose(f['bad_park'])['status']=='rejected'

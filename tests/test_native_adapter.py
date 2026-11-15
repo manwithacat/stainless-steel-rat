@@ -6,7 +6,7 @@ from support import need_engine
 ENGINE=need_engine()
 import kickmix as km
 from ssr.native.adapter import NativeProbe,V
-from ssr.mouse.fixtures import write_fixture
+from ssr.core.fixtures import write_fixture
 
 def reference(path,rows,seed,width):
  c=km.Circuit.from_file(str(path),format='kmb');sim=km.Simulator(batch_size=256,seed=seed,counting_operations=True)

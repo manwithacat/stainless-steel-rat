@@ -4,7 +4,7 @@ import pytest
 from support import need_engine
 ENGINE=need_engine()
 from ssr.stream.stream import StreamingProbe
-from ssr.mouse.fixtures import write_fixture
+from ssr.core.fixtures import write_fixture
 import kickmix as km
 def test_group_and_thread_invariance_and_negative(tmp_path):
  f=write_fixture(tmp_path/'f');p=StreamingProbe(ENGINE,f['contract'])
