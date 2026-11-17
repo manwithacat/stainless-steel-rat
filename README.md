@@ -3,7 +3,7 @@
 > **Work in progress.** This is a research toolkit published as it stands, mid-development. Interfaces and rule
 > names may change without notice, the native backend is marked experimental, and only the `invsqrt` task adapter
 > exists. Nothing here produces a score on its own: the competition's official verifier is the only authority.
-> Written with AI assistance (Claude) under the repository owner's direction. Issues and pull requests are welcome.
+> Written with AI assistance (ChatGPT and Claude) under the repository owner's direction. Issues and pull requests are welcome.
 
 The Stainless Steel Rat (SSR, or "the Rat") is a toolkit that lets an LLM agent rewrite
 [kickmix](https://github.com/quantumlib/Qualtran/tree/main/kickmix) circuits (`.kmb`) safely.
@@ -31,6 +31,12 @@ queries, the vendored KMB tools and most rules work on any KMB.
 
 There is no learned policy. The tools are agent-directed: an agent (or a person) chooses the
 queries and actions, and the Rat enforces the bookkeeping.
+
+Admission v2 adds cumulative dirty-reset checks, targeted guarded-outcome
+coverage and exact-schedule engine pricing. The new live-value rank census
+filters free affine recovery before an expensive fit. Start with
+[admission and census](docs/ADMISSION_AND_CENSUS.md) or the
+[agent guide](docs/AGENT_GUIDE.md); [changelog](CHANGELOG.md) records credits.
 
 ## Install
 
@@ -86,7 +92,7 @@ python -m ssr.rat --run runs/demo init --source runs/fixture/source.kmb \
   "incumbent_sha256": "8ac4fce6642cbaf5f3970736bcc1e35568a6903aa0922c040d61f008978cdbd9",
   "declared_qubits": 4,
   "loss_estimate": 45.63790333539637,
-  "acceptance": "all legal inputs under native chunk-seeded7/101; final scratch/input/tolerance; no cumulative dirty-reset check",
+  "acceptance": "all legal x; cumulative dirty resets; zero/7/101; parent-bound activating-subspace screen; INCONCLUSIVE rejects; finite outcomes, not a proof",
   "debt_fraction": 0.05,
   "attempts": 0,
   "evaluations": 1,
@@ -141,7 +147,8 @@ with any command restores the last checkpoint.
 
 Earlier versions called the cursor the "mouse" (`ssr.mouse`, `CircuitMouse`). The old names still work for the 0.x
 series, with a deprecation warning. The format strings already written into run folders
-(`qhdl-circuit-mouse-store-v1` and its event and evaluation formats) are kept unchanged, so earlier runs still open.
+(`qhdl-circuit-mouse-store-v1` and its event and evaluation formats) are kept unchanged.
+Admission v2 requires a fresh context; old native runs retain their original evaluator and evidence scope.
 
 ## The core loop, as an agent should run it
 
@@ -155,7 +162,9 @@ series, with a deprecation warning. The format strings already written into run 
 4. **step** (`--expected <current SHA>`) with one typed action. Budget: 8 attempts and 8 native
    evaluations; cached evaluations of an already-seen SHA are free.
 5. **evaluate** happens inside `step`: the candidate runs natively on every legal input under
-   two seeded measurement schedules. Statuses: `rejected`, `pruned` (valid but above the
+   zero/7/101 plus cumulative dirty-reset checks, a parent-bound activating-subspace
+   screen and exact-schedule engine pricing. Finite outcomes are a prescreen, not
+   an all-history proof. Statuses: `rejected`, `pruned` (valid but above the
    source-anchored loss ceiling, default +5%), `duplicate`, `entered_native_model`,
    `not_entered` (a guard refused it; the error says which).
 6. **rollback** (`--expected <current SHA>`) to back out of a branch. The incumbent and all
@@ -171,6 +180,7 @@ The exact command and action reference to give an agent is
 | `ssr.rat`, `ssr.workbench` | `{"type":"overview"}` | declared width, operations, registers, structure |
 | `ssr.rat`, `ssr.workbench` | `{"type":"window","start":0,"end":6}` | exact op records, conditions, 128-bit angles (≤256 ops) |
 | `ssr.rat`, `ssr.workbench` | `{"type":"wire","wire":3}` | lifetimes, touches, phase uses, idle gaps |
+| `ssr.rat` | `{"type":"rank_liveness","points":64}` | affine independence of live values; rejects free affine recovery, not paid rebuilds |
 | `ssr.rat`, `ssr.workbench` | `{"type":"peak"}` (optional `start` or `index`) | allocator live peak and wires at it |
 | `ssr.workbench` | `{"type":"value","at":1,"wires":[0,3],"level":"full"}` | wire values in three local outcome models |
 | `ssr.workbench` | `{"type":"fit_recompute","wire":3,"after":0,"before":5,"basis":[0,1,2],"degree":2,"validation":"full"}` | inferred XOR-of-products expression or counterexample |
@@ -233,14 +243,16 @@ child) and to the verifier.
 | --- | --- | --- |
 | static | structure queries, census tools | facts about bytes and lifetimes; says nothing about values |
 | local prescreen | BitSim models (`zero`, `7`, `101`), `hmr_stress`, rule fits | correct on those inputs and outcome models only |
-| native whole-circuit gate | `ssr.rat` / `ssr.stream` evaluation | every legal input under two seeded native schedules; final scratch, input and tolerance; no cumulative dirty-reset check |
+| admission v2 | `ssr.rat` | every legal x under zero/7/101, cumulative dirty resets, targeted transition outcomes; exact-schedule engine cost; finite outcomes, not a proof |
+| legacy native diagnostic | `ssr.stream` / `ssr.rat.stream` | original two seeded schedules, final scratch only, padded cost estimate |
 | official verifier | the unmodified official verifier, run separately | the task's own acceptance and cost |
 
 Never claim:
 
 * that a candidate is *correct* or *equivalent* from a static query, a sampled fit, or a lower gate count;
-* that a Rat `loss` or `loss_estimate` is the official cost. It is the official formula applied
-  to fixed local or native schedules, with final-input padding included;
+* that v2 engine pricing is a fresh official-simulator or hosted result. It reproduces
+  the default-salt official schedule and formula. Legacy local/stream estimates still
+  use their own schedules and may include padding;
 * that "no candidate" from a bounded query means no improvement exists. It covers only that basis,
   degree and budget;
 * an official result you did not run. `python -m ssr.cursor ... record-official --report R` only
@@ -267,8 +279,9 @@ Never claim:
   windows come from the agent or a rule.
 * One task adapter (`invsqrt`, at most 22 input wires). The exact-domain crosscut queries need the
   full 22-wire task.
-* Native acceptance uses two seeded schedules per input, not all measurement histories, and has
-  no cumulative dirty-reset check.
+* Admission v2 checks cumulative dirty resets under its listed schedules and
+  targeted transitions, but still does not enumerate all measurement histories.
+  The legacy streaming diagnostic has final-scratch checks only.
 * Local BitSim and native engine use different random-number schedules and phase arithmetic;
   receipts from one never satisfy the other.
 * The official verifier is not shipped; you must supply it.
@@ -283,7 +296,7 @@ ssr/mouse/      deprecated alias for ssr.core and ssr.cursor (0.x series)
 ssr/workbench/  read-only investigation journal over a local run
 ssr/native/     native engine probe
 ssr/stream/     first native loop (streaming evaluator)
-ssr/rat/        the Rat: native loop with static queries (main agent CLI)
+ssr/rat/        the Rat: admission v2, rank-liveness census, native loop (main agent CLI)
 ssr/crosscut/   cross-cut reconstruction rule, information boundary, gap census
 ssr/rules/      other rules and prescreens
 docs/           rule contract, agent guide

@@ -8,8 +8,9 @@ from .evaluator import V,InvSqrtEvaluator
 
 def write_fixture(out):
  out=Path(out);out.mkdir(parents=True,exist_ok=False)
- contract={'task':'invsqrt','width':2,'max_x':3,'beta':'1','precision_bits':24,'official_shots_per_x':64,'system_qubits':12}
- spec=V.ProblemSpecInvSqrt(width=2,max_x=3,beta=Fraction(1),precision_bits=24,shots_per_x=64,system_qubits=12)
+ # 3*256 shots is divisible by the engine batch size; no synthetic padding.
+ contract={'task':'invsqrt','width':2,'max_x':3,'beta':'1','precision_bits':24,'official_shots_per_x':256,'system_qubits':12}
+ spec=V.ProblemSpecInvSqrt(width=2,max_x=3,beta=Fraction(1),precision_bits=24,shots_per_x=256,system_qubits=12)
  import numpy as np
  targets,_=V.reference_values(spec,np.array([1,2,3],dtype=np.uint64));a,b,c=[int(t) for t in targets]
  angle_b=Fraction(b,1<<63);angle_delta=Fraction((c-a-b)%(1<<64),1<<63)

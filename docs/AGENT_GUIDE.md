@@ -16,6 +16,8 @@ observe
 query    --expected SHA --request JSON
 step     --expected SHA --action JSON
 rollback --expected SHA
+census --source SOURCE.kmb --points 817 --out census.json
+admit --source CHILD.kmb --parent PARENT.kmb --out admission.json
 ```
 
 Every command reopens the durable run directory. Take `state_sha256` from `observe` and pass it as `--expected`; a stale SHA is refused, so an indexed edit can never land on a state you did not look at. A run allows up to 12 queries, 8 attempts and 8 native evaluations (invalid queries count too). Use one writer per run directory.
@@ -48,7 +50,9 @@ Every command reopens the durable run directory. Take `state_sha256` from `obser
     Bounded splice (at most 256 ops). Copy unchanged angle-bearing ops with {"copy_op":K}.
 ```
 
-Construction guards check syntax, condition depth, idleness and lifetimes. They do not prove the reconstruction is right: the whole candidate is evaluated natively on every legal input under two seeded measurement schedules before it can be entered.
+Construction guards check syntax, condition depth, idleness and lifetimes. They do not prove the reconstruction is right. Admission v2 checks every legal input under zero/7/101 with cumulative dirty resets, prices the exact official schedule through our engine, and requires a parent-bound activating-subspace transition screen. INCONCLUSIVE cannot enter the Rat. These outcome samples are not an all-history proof.
+
+Before a park fit, use `{"type":"rank_liveness","points":64}`. Full affine rank rules out a free affine recovery at that interface; it leaves nonlinear rebuilds eligible. Standalone `census` avoids initializing a full Rat run. See [admission and census](ADMISSION_AND_CENSUS.md) for commands, cut semantics, witness scope and cost calibration.
 
 ## Reading results
 
@@ -59,4 +63,4 @@ Construction guards check syntax, condition depth, idleness and lifetimes. They 
 
 ## What to report
 
-Your query and action decisions and why, each acceptance or rejection, the final current and incumbent SHA, and anything confusing. State the evidence tier of every number: a Rat `loss_estimate` is a native fixed-seed estimate, not an official cost.
+Your query and action decisions and why, each acceptance or rejection, the final current and incumbent SHA, and anything confusing. State the evidence tier: v2 `loss_estimate` is the engine reproduction of the default-salt official schedule/formula, not an official-simulator or hosted result. Legacy stream/local losses keep their original sampled meaning.

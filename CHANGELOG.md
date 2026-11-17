@@ -1,0 +1,22 @@
+# Changelog
+
+## Unreleased — 17 November 2026
+
+- Rat admission v2 combines all-legal-input bit-sliced checks under zero/7/101,
+  cumulative dirty-reset accounting, parent-bound activating-subspace checks,
+  and engine reproduction of the default-salt official cost schedule. Skipped,
+  unknown or unactivated changed guards cannot pass the transition screen.
+  Outcomes remain finite samples; this is not an all-history proof. Existing
+  streaming diagnostics keep their original semantics. New acceptance contexts
+  require fresh run directories.
+- `census` and `rank_liveness` expose source-bound live-value GF(2) ranks, with
+  the constant column included for affine dependence. Full rank filters free
+  affine recovery; it does not exclude a paid nonlinear rebuild. Sampled
+  relations require validation before construction.
+- Credit crackercoder (Sazzad) for suggesting stronger admission and a rank
+  liveness census in Kaggle discussion 755075. No code from that team was
+  imported. The activating-subspace helper is vendored from this project's
+  Claude/P pathway (`scripts/qhdl_alloutcome.py`), with R additions for dirty
+  reset counts, task audits and conservative coverage handling.
+
+Real-circuit calibration and limits: [admission and census](docs/ADMISSION_AND_CENSUS.md).

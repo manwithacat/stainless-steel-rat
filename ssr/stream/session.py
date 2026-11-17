@@ -13,6 +13,8 @@ class NativeRat:
  probe_class=StreamingProbe
  @classmethod
  def core_fingerprints(cls):return StateCursor._fingerprints()
+ def context_policy(self):return {}
+ def _transition_receipt(self,parent,state,receipt):return receipt
  def __init__(self,root,engine_python,source=None,contract=None,debt_fraction=None):
   self.root=Path(root);cp=self.root/'context.json';old=json.loads(cp.read_text())['context'] if cp.exists() else None
   contract=contract or (old['contract'] if old else default_contract());self.probe=self.probe_class(engine_python,contract)
@@ -21,6 +23,7 @@ class NativeRat:
   debt_fraction=old['debt_fraction'] if debt_fraction is None and old else 0.05 if debt_fraction is None else float(debt_fraction)
   if not 0 <= debt_fraction <= 0.5:raise ValueError('debt_fraction must be between 0 and 0.5')
   context={'schema':'ssr-native-rat/1','source_sha256':source_sha,'contract':contract,'backend':self.probe.identity,'core_fingerprints':self.core_fingerprints(),'controller':{str(Path(__file__)):sha(__file__),str(Path(actions.__file__)):sha(actions.__file__)},'acceptance':'all legal inputs under native chunk-seeded7/101; final scratch/input/tolerance; no cumulative dirty-reset check','loss':'padded native fixed-seed estimate; not official expected cost','settings':{'threads':4,'group_chunks':16,'seeds':[7,101]},'budgets':{'attempts':8,'evaluations':8},'debt_fraction':debt_fraction}
+  context.update(self.context_policy())
   self.store=StateStore(root,context);self.context=context
   events=self.store.read_events();snap=next((e['payload']['snapshot'] for e in reversed(events) if 'snapshot' in e['payload']),None)
   if snap:self.current=snap['current'];self.incumbent=snap['incumbent'];self.stack=snap['stack']
@@ -51,6 +54,7 @@ class NativeRat:
   self.store.append_event('attempt_started',{'parent':parent,'action':action})
   try:
    built=actions.apply_action(self._path(parent),action,self.root/'attempts'/str(number));state=self.store.add_state(built['candidate'])['sha256'];r=self._evaluate(state)
+   r=self._transition_receipt(parent,state,r)
    ceiling=self.receipt(self.context['source_sha256'])['loss_estimate']*(1+self.context['debt_fraction'])
    if not r['valid_on_native_models']:result={'status':'rejected','child':state}
    elif r['loss_estimate']>ceiling:result={'status':'pruned','child':state}
