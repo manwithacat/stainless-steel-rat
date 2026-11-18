@@ -1,0 +1,5 @@
+[
+  "CCX q0 q1 q2",
+  "CZ q2 q3 if b0",
+  "HMR q2 b1"
+]

@@ -22,3 +22,8 @@ Not included; used only when you install or point to them yourself:
 
 No public or private competition circuits are included. Test fixtures are small
 authored circuits.
+
+Portable component proof/constructor cores in ssr/components/ were ported from
+the same R research pathway: ssr_tasks, ssr_quadratic_components,
+ssr_measured_components, ssr_measured_framing and rat_workflow. Study data,
+competition verifiers and research execution controllers are not bundled.

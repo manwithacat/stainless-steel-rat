@@ -1,0 +1,6 @@
+[
+  "CCZ q0 q1 q2",
+  "SWAP q2 q3",
+  "X q4",
+  "CCZ q0 q1 q3"
+]
