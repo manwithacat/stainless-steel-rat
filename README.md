@@ -1,9 +1,9 @@
 # The Stainless Steel Rat
 
-> **Work in progress.** This is a research toolkit published as it stands, mid-development. Interfaces and rule
-> names may change without notice, the native backend is marked experimental, and only the `invsqrt` task adapter
-> exists. Nothing here produces a score on its own: the competition's official verifier is the only authority.
-> Written with AI assistance (ChatGPT and Claude) under the repository owner's direction. Issues and pull requests are welcome.
+> **0.3: portable component proofs and the invsqrt task loop.** The agent supplies
+> search and reasoning; the Rat supplies constructors, proof contracts, admission
+> and receipts. Component tools work with NumPy alone. Native task admission needs
+> the external dependencies below. Written with AI assistance (ChatGPT and Claude).
 
 The Stainless Steel Rat (SSR, or "the Rat") is a toolkit that lets an LLM agent rewrite
 [kickmix](https://github.com/quantumlib/Qualtran/tree/main/kickmix) circuits (`.kmb`) safely.
@@ -40,12 +40,37 @@ filters free affine recovery before an expensive fit. Start with
 
 ## Install
 
-Python 3.12 or later.
+Python 3.12 or later, NumPy 2 or later.
 
 ```sh
-pip install -e .            # numpy only
+pip install -e .            # numpy>=2 only
 pip install -e '.[test]'    # adds pytest
 ```
+
+For a repeatable development environment with uv:
+
+```sh
+uv venv --python 3.12
+uv pip sync --python .venv/bin/python requirements-dev.lock
+uv pip install --python .venv/bin/python --no-deps --no-build-isolation -e .
+.venv/bin/python -m pytest -q -rs
+```
+
+Check configuration and try the portable examples from the checkout:
+
+```sh
+ssr-rat doctor
+ssr-components capabilities
+ssr-components compare --backend reversible \
+  --source examples/reversible-source.json \
+  --candidate examples/reversible-child.json --out runs/proof.json
+```
+
+The [component workbench](docs/COMPONENTS.md) provides exact reversible,
+quadratic and measured comparisons, source-bound phase-demand construction,
+disjoint-body retiming and bounded-memory full-child assembly. These tools
+work on components from any task without a local competition checkout.
+They do not provide DQI or chemistry whole-task admission.
 
 Three things are optional and not included (see [NOTICE](NOTICE)):
 
@@ -64,6 +89,10 @@ Run the tests:
 ```sh
 python -m pytest -q
 ```
+
+The [0.3 release checks](docs/RELEASE_VALIDATION.md) cover both the native
+suite and a fresh dependency-light wheel installation. GitHub Actions runs
+the portable checks on Python 3.12 and 3.13.
 
 Tests that need a missing dependency are skipped with the reason. From an uninstalled checkout, run
 them from the repo root without `-I`: isolated mode (`python -I`) drops the current directory from
@@ -289,6 +318,7 @@ Never claim:
 ## Package layout
 
 ```
+ssr/components/ portable exact component proofs, constructors and streaming assembly
 ssr/qhdl/       vendored QHDL core: KMB I/O, bitset simulator, lifetime allocator, editors
 ssr/core/       state store, invsqrt task model and verifier loading, guarded actions, fixture
 ssr/cursor/     the state cursor: local (BitSim) loop over the state graph, and its CLI
@@ -299,7 +329,7 @@ ssr/stream/     first native loop (streaming evaluator)
 ssr/rat/        the Rat: admission v2, rank-liveness census, native loop (main agent CLI)
 ssr/crosscut/   cross-cut reconstruction rule, information boundary, gap census
 ssr/rules/      other rules and prescreens
-docs/           rule contract, agent guide
+docs/           rule contracts, component workbench, admission and agent guides
 tests/          authored-fixture tests
 ```
 

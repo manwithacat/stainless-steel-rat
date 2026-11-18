@@ -13,4 +13,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+wheel-env/
+wheel-proof.json
 .hypothesis/

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 17 November 2026
+## 0.3.0 — 18 November 2026
 
 - Rat admission v2 combines all-legal-input bit-sliced checks under zero/7/101,
   cumulative dirty-reset accounting, parent-bound activating-subspace checks,
@@ -20,3 +20,13 @@
   reset counts, task audits and conservative coverage handling.
 
 Real-circuit calibration and limits: [admission and census](docs/ADMISSION_AND_CENSUS.md).
+
+- Publish the validated portable component workbench: reversible, dense quadratic
+  and measured proofs, disjoint-body retiming, phase-demand construction and
+  bounded same-width assembly. Package-relative imports replace research paths;
+  independent scalar and fault controls ship with the code.
+- Add `ssr-components`, authored examples and a discoverable component guide.
+  Generic component support does not imply DQI/chemistry task verification.
+- Add dependency-light `ssr-rat doctor` and help, actionable native dependency
+  failures, NumPy>=2 requirement, synchronized package versions, hashed uv
+  development dependencies and public portable-test CI.

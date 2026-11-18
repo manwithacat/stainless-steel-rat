@@ -1,0 +1,27 @@
+name: Portable Rat
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install uv==0.11.19
+      - run: uv venv --python python
+      - run: uv pip sync --python .venv/bin/python requirements-dev.lock
+      - run: uv pip install --python .venv/bin/python --no-deps --no-build-isolation -e .
+      - run: .venv/bin/python -m pytest -q -rs
+      - run: uv build --python .venv/bin/python --no-build-isolation --wheel
+      - run: uv venv wheel-env --python python
+      - run: uv pip sync --python wheel-env/bin/python requirements-dev.lock
+      - run: uv pip install --python wheel-env/bin/python --no-deps dist/*.whl
+      - run: wheel-env/bin/ssr-rat doctor
+      - run: wheel-env/bin/ssr-components capabilities
+      - run: wheel-env/bin/ssr-components compare --source examples/reversible-source.json --candidate examples/reversible-child.json --out wheel-proof.json

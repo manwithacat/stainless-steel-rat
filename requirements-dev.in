@@ -1,0 +1,5 @@
+# Portable development and wheel validation. Native dependencies are external.
+numpy>=2
+pytest>=8
+setuptools>=77
+wheel

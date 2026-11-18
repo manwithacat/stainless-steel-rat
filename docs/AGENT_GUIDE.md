@@ -1,6 +1,6 @@
 # Agent guide: operating the Rat through its CLI
 
-This page is the short protocol to hand an agent that operates a Rat run. It assumes the environment from the README (kickmix importable, `SSR_INVSQRT_VERIFIER` and `SSR_ENGINE_PYTHON` set).
+This page is the short protocol to hand an agent that operates a Rat run. Start with `ssr-rat doctor`. The native loop needs kickmix, `SSR_INVSQRT_VERIFIER` and `SSR_ENGINE_PYTHON`; the [component workbench](COMPONENTS.md) needs only NumPy and is available before native setup.
 
 ## Command prefix
 
@@ -46,8 +46,8 @@ Every command reopens the durable run directory. Take `state_sha256` from `obser
 {"type":"park_factored", ...} / {"type":"park_one_scratch", ...}
     Factored reconstructions using 2 / 1 dead scratch wires. Take these from
     `python -m ssr.crosscut.rule SOURCE.kmb --fit-index K` ("fit_result"."action"); do not hand-write them.
-{"type":"replace_window","start":I,"end":J,"ops":["CX q0 q2", {"copy_op":K}]}
-    Bounded splice (at most 256 ops). Copy unchanged angle-bearing ops with {"copy_op":K}.
+{"type":"replace_window","start":I,"end":J,"ops":["CX q0 q2", "@K"]}
+    Bounded splice (at most 256 ops). Copy unchanged angle-bearing ops with the string "@K".
 ```
 
 Construction guards check syntax, condition depth, idleness and lifetimes. They do not prove the reconstruction is right. Admission v2 checks every legal input under zero/7/101 with cumulative dirty resets, prices the exact official schedule through our engine, and requires a parent-bound activating-subspace transition screen. INCONCLUSIVE cannot enter the Rat. These outcome samples are not an all-history proof.
