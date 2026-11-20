@@ -6,7 +6,7 @@ import json
 from . import chemistry, supplied
 from .source import K, sha, canonical, fingerprint, operations, profile, word_table
 
-COMMANDS = {'tools', 'context', 'scan', 'construct', 'width', 'loans', 'chemistry-relations'}
+COMMANDS = {'tools', 'context', 'scan', 'construct', 'width', 'loans', 'chemistry-relations', 'inverse-channel'}
 TASKS = ['invsqrt', 'dqi', 'chemistry']
 
 
@@ -26,6 +26,10 @@ def add_commands(sub):
     c.add_argument('--rule', choices=['auto', 'quick', 'supplied'], default='auto')
     c.add_argument('--out', required=True, help='fresh output directory')
     c.add_argument('--max-events', type=int, default=64)
+    c = sub.add_parser('inverse-channel', help='prove two initialized GF64 inverse leaves with three observable records')
+    c.add_argument('--source', required=True)
+    c.add_argument('--candidate', required=True)
+    c.add_argument('--out', required=True, help='fresh JSON receipt')
     c = sub.add_parser('chemistry-relations', help='exact typed delta-word constraints; no fitting/task admission')
     c.add_argument('--words', required=True, help='NPZ with assembled angle_words')
     c.add_argument('--relations', required=True, help='int/F/B/G target dialects')
@@ -81,6 +85,10 @@ def tools(task=None):
              evidence='rule theorem under stated interface; task gate separate'),
     ]
     extra = []
+    if task in [None, 'dqi']:
+        extra.append(dict(command='ssr-rat inverse-channel --source OLD.kmb --candidate NEW.kmb --out RECEIPT.json',
+                          purpose='prove the six-bit initialized inverse and joint three-record channel; price the replacement',
+                          stage='component proof', requires='standalone normalized leaves, zero workspace and fixed physical ports'))
     if task in [None, 'chemistry']:
         extra.append(dict(command='ssr-rat chemistry-relations --words TABLE.npz --relations RELATIONS.txt --word-bits 7 --out FRESH',
                           purpose='check exact coded delta constraints with int/F/B/G targets',stage='structural proof',
@@ -369,6 +377,11 @@ def chemistry_relations(args):
 
 
 def dispatch(args):
+    if args.command == 'inverse-channel':
+        from .inverse_channel import compare
+        result = compare(args.source, args.candidate)
+        write(args.out, result)
+        return result
     if args.command == 'chemistry-relations':
         return chemistry_relations(args)
     if args.command == 'loans':

@@ -107,3 +107,15 @@ For construction beyond a fixed loader, read [chemistry methods](CHEMISTRY_METHO
 The supported `chemistry-relations` command checks the supplied integer words
 against mask/F/B/composed-G targets. It does not run the staged rounder, infer
 numerical validity, or claim a new table has the same compiled cost.
+
+### DQI initialized six-bit inverse
+
+Use `ssr-rat inverse-channel --source OLD.kmb --candidate NEW.kmb --out receipt.json`
+on two standalone normalized leaves with q0–5 holding the source, q6–11 fresh
+for the output, and every remaining qubit initially zero. All three physical
+record bits enter arbitrary and return jointly uniform. The command checks
+all 64 inputs, every affine measurement phase coefficient, an injective
+quantum frame after each measurement, and the rank of the returned records.
+It reports the two component widths and charges. Matching the caller's
+physical ports, allocating the scratch at the call site, and measuring the
+DQI expected cost are separate steps.
