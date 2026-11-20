@@ -1,19 +1,19 @@
 # The Stainless Steel Rat
 
-> **0.3: portable component proofs and the invsqrt task loop.** The agent supplies
-> search and reasoning; the Rat supplies constructors, proof contracts, admission
-> and receipts. Component tools work with NumPy alone. Native task admission needs
-> the external dependencies below. Written with AI assistance (ChatGPT and Claude).
+**Version 0.4.0** adds a portable workbench for inverse square root, DQI and
+chemistry. An agent can inspect a KMB, find applicable rules and produce
+receipts that bind each finding to the circuit it examined. Written with AI
+assistance (ChatGPT and Claude).
 
 The Stainless Steel Rat (SSR, or "the Rat") is a toolkit that lets an LLM agent rewrite
 [kickmix](https://github.com/quantumlib/Qualtran/tree/main/kickmix) circuits (`.kmb`) safely.
 The agent proposes; the Rat builds, checks, records and refuses.
 
-The development branch adds a [portable task entry](docs/TASK_ENTRY.md):
-source-bound context, constructive rule handles, supplied-word chemistry
-identities, and bounded-memory width/product-loan censuses. These additions
-are not a DQI or chemistry task verifier, and a width census does not itself
-emit a narrower circuit.
+Start with the task menu, for example `ssr-rat tools --task dqi`. It lists
+the inputs and evidence each command produces. The workbench can compare two
+six-bit inverse leaves, check supplied chemistry words against their targets,
+and identify where qubits might be reused. A candidate for DQI or chemistry
+still needs the caller’s whole-circuit verifier. [Portable task guide](docs/TASK_ENTRY.md)
 
 It has two parts:
 

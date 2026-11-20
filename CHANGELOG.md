@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — portable task workbench
+## 0.4.0 — 20 November 2026
 
 - Add source-bound `tools`, `context`, `scan` and `construct` entry points.
   The chemistry supplied-function constructor derives word widths from
@@ -15,7 +15,10 @@
   algebra and relation contracts; no source data ships in the package.
 - Stream hashes and preserve charged candidates beyond free-operation noise.
   Refusals retain receipts without overwriting existing output directories.
-
+- Add `inverse-channel` to compare initialized GF(64) inverse components across
+  all 64 inputs, including phase repayment, clean scratch and the joint
+  distribution of three returned classical bits. The receipt reports the
+  component cost. Whole-circuit DQI admission is a separate step.
 
 ## 0.3.0 — 18 November 2026
 

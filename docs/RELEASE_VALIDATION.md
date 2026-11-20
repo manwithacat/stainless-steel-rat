@@ -1,4 +1,18 @@
-# 0.3.0 release checks
+# Release checks
+
+## 0.4.0 (20 November 2026)
+
+The configured suite passed 153 tests and 10 subtests, with one skip. An
+offline build produced a 0.4.0 wheel. From a fresh installation, the DQI
+menu exposed `inverse-channel`. The installed command reproduced the
+19→18 and 20→18 Toffoli comparisons and rejected a leaf with an incompatible
+classical interface. These comparisons used externally supplied leaves and
+ran without importing the native engine. The component receipts cover all
+64 field inputs under the initialized interface described in the
+[task guide](TASK_ENTRY.md#dqi-initialized-six-bit-inverse). Their counts
+apply to the leaf. A leaderboard claim requires whole-circuit evaluation.
+
+## 0.3.0 release checks
 
 18 November 2026. The production package was frozen and tested in a
 network-disabled sandbox with isolated Python, source/runtime hashes and a
