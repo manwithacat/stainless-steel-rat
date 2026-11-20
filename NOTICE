@@ -27,3 +27,10 @@ Portable component proof/constructor cores in ssr/components/ were ported from
 the same R research pathway: ssr_tasks, ssr_quadratic_components,
 ssr_measured_components, ssr_measured_framing and rat_workflow. Study data,
 competition verifiers and research execution controllers are not bundled.
+
+The exact affine-atom normalization and typed chemistry-relation equations in
+ssr/tasks/atoms.py and ssr/tasks/relations.py were informed by team ThemBones'
+Apache-2.0 public vqcc-thembones-milestone-generators toolkit (November 2026).
+The former uses full exact forms instead of upstream probabilistic hashes;
+the latter independently implements the RK7/R65 target definitions. Their
+upstream fitting/rounding code and competition artifacts are not bundled.

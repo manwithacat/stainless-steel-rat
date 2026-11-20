@@ -1,5 +1,9 @@
 # Working with the Rat
 
+For task-specific context and large-circuit pressure, read
+[the portable task entry](docs/TASK_ENTRY.md) and run `ssr-rat tools --task TASK`.
+Its width/product-loan censuses do not construct a joint lower-width circuit.
+
 Start with `ssr-rat doctor` and `ssr-components capabilities`, then read
 [the agent guide](docs/AGENT_GUIDE.md). The component tools require NumPy;
 the invsqrt task loop also needs kickmix, the separate Rust engine and your

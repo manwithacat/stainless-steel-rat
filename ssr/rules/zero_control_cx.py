@@ -16,10 +16,11 @@ from collections import Counter
 from pathlib import Path
 
 from ssr.qhdl import kmb as K  # noqa: E402
+from ssr.components.common import sha
 
 
 def scan(path: Path, stop: int, focus: tuple[int, int], max_events: int,
-         cuts=()):
+         cuts=(), event_kinds=None):
     k = K.read(str(path))
     if not 0 <= focus[0] <= focus[1] <= stop <= len(k.op_types):
         raise ValueError("invalid stop/focus")
@@ -63,7 +64,7 @@ def scan(path: Path, stop: int, focus: tuple[int, int], max_events: int,
                     counts["CCZ"] += 1
                     if focus[0] <= op < focus[1]:
                         focus_counts["CCZ"] += 1
-                        if len(events) < max_events:
+                        if len(events) < max_events and (event_kinds is None or "CCZ" in event_kinds):
                             events.append({"op": op, "kind": "CCZ", "qubits": [a, b, c],
                                            "zero_operand": known[0], "origin": origin[known[0]]})
                 continue
@@ -73,7 +74,7 @@ def scan(path: Path, stop: int, focus: tuple[int, int], max_events: int,
                     counts["CCX"] += 1
                     if focus[0] <= op < focus[1]:
                         focus_counts["CCX"] += 1
-                        if len(events) < max_events:
+                        if len(events) < max_events and (event_kinds is None or "CCX" in event_kinds):
                             events.append({"op": op, "kind": "CCX", "qubits": [a, b, c],
                                            "zero_control": control, "origin": origin[control]})
                 else:
@@ -84,7 +85,7 @@ def scan(path: Path, stop: int, focus: tuple[int, int], max_events: int,
                     counts["CSWAP"] += 1
                     if focus[0] <= op < focus[1]:
                         focus_counts["CSWAP"] += 1
-                        if len(events) < max_events:
+                        if len(events) < max_events and (event_kinds is None or "CSWAP" in event_kinds):
                             events.append({"op": op, "kind": "CSWAP", "qubits": [a, b, c],
                                            "zero_operand": known, "origin": origin[known]})
                 else:
@@ -104,7 +105,7 @@ def scan(path: Path, stop: int, focus: tuple[int, int], max_events: int,
                     counts["CX"] += 1
                     if focus[0] <= op < focus[1]:
                         focus_counts["CX"] += 1
-                        if len(events) < max_events:
+                        if len(events) < max_events and (event_kinds is None or "CX" in event_kinds):
                             events.append({"op": op, "kind": "CX", "qubits": [a, b],
                                            "zero_control": a, "origin": origin[a]})
                 else:
@@ -141,10 +142,10 @@ def scan(path: Path, stop: int, focus: tuple[int, int], max_events: int,
     if stop in cut_set:
         zero_at_cuts[str(stop)] = [q for q in scratch if zero[q]]
         depth_at_cuts[str(stop)] = depth
-    return {"source_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    return {"source_sha256": sha(path),
             "num_ops_scanned": stop, "focus": list(focus),
             "counts": dict(counts), "focus_counts": dict(focus_counts),
-            "events": events, "events_truncated": sum(focus_counts.values()) > len(events),
+            "events": events, "events_truncated": sum(v for n,v in focus_counts.items() if event_kinds is None or n in event_kinds) > len(events),
             "zero_at_cuts": zero_at_cuts,
             "depth_at_cuts": depth_at_cuts,
             "zero_wires_at_stop": sum(zero), "condition_depth_at_stop": depth,

@@ -2,6 +2,11 @@
 
 This page is the short protocol to hand an agent that operates a Rat run. Start with `ssr-rat doctor`. The native loop needs kickmix, `SSR_INVSQRT_VERIFIER` and `SSR_ENGINE_PYTHON`; the [component workbench](COMPONENTS.md) needs only NumPy and is available before native setup.
 
+For DQI/chemistry entry, source-bound construction, or a large decoder whose
+operation graph would exceed memory, use the [task entry](TASK_ENTRY.md).
+`ssr-rat tools --task dqi` distinguishes context, census, construction and
+whole-task gates. Those portable commands do not need `--run` or an engine.
+
 ## Command prefix
 
 ```sh

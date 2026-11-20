@@ -16,8 +16,20 @@ s.add_parser('observe')
 for name,field in [('query','request'),('step','action'),('rollback',None)]:
  a=s.add_parser(name);a.add_argument('--expected',required=True)
  if field:a.add_argument('--'+field,required=True)
+from ssr.tasks.cli import add_commands, dispatch, COMMANDS
+add_commands(s)
 def main():
  a=p.parse_args()
+ if a.command in COMMANDS:
+  output=Path(a.out) if getattr(a,'out',None) else None
+  existed=output.exists() if output else False
+  try:
+   result=dispatch(a);print(json.dumps(result,indent=2));return 0
+  except (ValueError,KeyError,TypeError,OSError,ImportError,RuntimeError) as exc:
+   if output is not None and not existed and output.is_dir() and not (output/'failure.json').exists():
+    from ssr.tasks.cli import write
+    write(output/'failure.json',dict(status='error',error=str(exc),task_admission='NOT_RUN'))
+   print(json.dumps({'status':'error','error':str(exc)}));return 2
  if a.command=='doctor':
   print(json.dumps(doctor(a.engine_python),indent=2));return 0
  if a.run is None:p.error('--run is required for this command')

@@ -9,6 +9,12 @@ The Stainless Steel Rat (SSR, or "the Rat") is a toolkit that lets an LLM agent 
 [kickmix](https://github.com/quantumlib/Qualtran/tree/main/kickmix) circuits (`.kmb`) safely.
 The agent proposes; the Rat builds, checks, records and refuses.
 
+The development branch adds a [portable task entry](docs/TASK_ENTRY.md):
+source-bound context, constructive rule handles, supplied-word chemistry
+identities, and bounded-memory width/product-loan censuses. These additions
+are not a DQI or chemistry task verifier, and a width census does not itself
+emit a narrower circuit.
+
 It has two parts:
 
 1. **An agent loop on a native engine.** Every circuit state is stored under its SHA-256. The

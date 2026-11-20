@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased — portable task workbench
+
+- Add source-bound `tools`, `context`, `scan` and `construct` entry points.
+  The chemistry supplied-function constructor derives word widths from
+  registers, checks both actual endpoints and preserves prior phase/history.
+- Add bounded-memory width invoices and exact single-product loan censuses.
+  The latter does not construct a joint schedule or a narrower KMB.
+- Add an exact typed chemistry constraint checker for mask/F/B/composed-G
+  targets, including the optional low-address table. Keep optimization
+  runtimes and whole-task admission external.
+- Add a bounded exact affine-atom value core and controls; it is not a
+  standalone phase or whole-task prover. Credit team ThemBones' published
+  algebra and relation contracts; no source data ships in the package.
+- Stream hashes and preserve charged candidates beyond free-operation noise.
+  Refusals retain receipts without overwriting existing output directories.
+
+
 ## 0.3.0 — 18 November 2026
 
 - Rat admission v2 combines all-legal-input bit-sliced checks under zero/7/101,
